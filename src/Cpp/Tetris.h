@@ -218,6 +218,15 @@ namespace Nanochord
         StickoutRight = 3,
     };
 
+    /// <summary>
+    /// Different kind of Tetris events
+    /// </summary>
+    enum TetrisEventKind
+    {
+        GameOver,
+        Touchdown,
+        RowCompleted
+    };
 
     /// <summary>
     /// Abstract class, interface to the embedder environment
@@ -245,6 +254,9 @@ namespace Nanochord
 
         // Generates a random number between 0 and max.
         virtual int Random(int max) = 0;
+
+        // Called when a Tetris game event occurs.
+        virtual void TetrisEvent(TetrisEventKind kind) = 0;
     };
 
 
@@ -343,7 +355,7 @@ namespace Nanochord
             {
                 byte yy = pBlock->Y + 1 - i;
 
-                if (yy < 20)
+                if (yy < m_Rows)
                 {
                     if ((currBmp[i] & 0x8) != 0)
                         Map[yy][pBlock->X - 2] = pBlock->Color;
@@ -609,26 +621,42 @@ namespace Nanochord
 
         virtual Block* CreateNewRandomBlock()
         {
+            Block* pBlock = NULL;
+
             switch (m_pHost->Random(8))
             {
             default:
             case 0:
-                return new Block_O();
+                pBlock = new Block_O();
+                break;
             case 1:
-                return new Block_I();
+                pBlock = new Block_I();
+                break;
             case 2:
-                return new Block_S();
+                pBlock = new Block_S();
+                break;
             case 3:
-                return new Block_Z();
+                pBlock = new Block_Z();
+                break;
             case 4:
-                return new Block_J();
+                pBlock = new Block_J();
+                break;
             case 5:
-                return new Block_L();
+                pBlock = new Block_L();
+                break;
             case 6:
-                return new Block_T();
+                pBlock = new Block_T();
+                break;
             }
 
-            return NULL;
+            if (pBlock)
+            {
+                pBlock->Y = m_Playfield.m_Rows - 1;
+                pBlock->X = m_Playfield.m_Columns / 2;
+                //pBlock->X = m_pHost->Random(m_Playfield.m_Columns - 4) + 2;
+            }
+
+            return pBlock;
         }
 
         virtual PlacementTestResult DoRun()
@@ -643,13 +671,13 @@ namespace Nanochord
                 delete m_pCurrentBlock;
                 m_pCurrentBlock = m_pNextBlock;
                 m_pNextBlock = CreateNewRandomBlock();
-                m_pNextBlock->X = m_pHost->Random(m_Playfield.m_Columns - 4);
                 m_pHost->DrawNextBlock(m_pNextBlock);
 
                 PlacementTestResult ptr2 = m_Playfield.PlacementTest(m_pCurrentBlock->GetCurrentBitmap(), m_pCurrentBlock->X, m_pCurrentBlock->Y);
                 if (ptr2 != PlacementTestResult::Succeeded)
                 {
                     m_GameOver = true;
+                    m_pHost->TetrisEvent(TetrisEventKind::GameOver);
                 }
             }
             else
@@ -679,6 +707,7 @@ namespace Nanochord
                 if (*pres != PlacementTestResult::Succeeded)
                 {
                     m_ActualPoints++; // TODO: It simply increases the number of points.
+                    m_pHost->TetrisEvent(TetrisEventKind::Touchdown);
                 }
 
                 // completed rows test
@@ -706,6 +735,7 @@ namespace Nanochord
                         m_ActualLevel = 10;
                     }
 
+                    m_pHost->TetrisEvent(TetrisEventKind::RowCompleted);
                     m_pHost->PaintPlayground(&m_Playfield);
                     m_pHost->DrawBlock(m_pCurrentBlock);
                 }

@@ -13,7 +13,7 @@ class ConsoleHost : public Nanochord::Host
 private:
     int m_rows;
     int m_cols;
-    int m_indend;
+    int m_indent;
 
 public:
     ConsoleHost(int rows, int cols)
@@ -21,9 +21,9 @@ public:
         m_rows = rows;
         m_cols = cols;
 
-        m_indend = (80 - m_cols - 4) / 2;
+        m_indent = (80 - m_cols - 4) / 2;
 
-        std::srand(time(0));
+        srand(time(0));
     }
 
 
@@ -31,34 +31,37 @@ public:
 
     void ClearBackground() override
     {
+        SetColor(0, 0);
         for (int r = 0; r < m_rows; r++)
         {
-            ConsoleHost::SetCursorPosition(m_indend + 1, 4 + r);
+            SetCursorPosition(m_indent + 1, 4 + r);
             cout << string(m_cols, ' ');
         }
 
-        ConsoleHost::SetCursorPosition(0, 0);
+        SetCursorPosition(0, 0);
     }
 
     void DrawBlock(const Nanochord::Block* pBlock) override
     {
-        DrawBlock(pBlock, pBlock->Color, m_indend + 1, 3);
+        DrawBlock(pBlock, pBlock->Color, m_indent + 1, 3, m_rows);
     }
 
     void DrawNextBlock(const Nanochord::Block* pBlock) override
     {
+        const byte* bmp = pBlock->GetCurrentBitmap();
+
         for (int i = 0; i < 4; i++)
         {
-            ConsoleHost::SetCursorPosition(3, 8 + i);
-            SetColor(0, 0);
-            cout << ' ';
+            DrawPixel(0, i, (bmp[i] & 0x8) != 0 ? pBlock->Color : 0, 4, 7, 4);
+            DrawPixel(1, i, (bmp[i] & 0x4) != 0 ? pBlock->Color : 0, 4, 7, 4);
+            DrawPixel(2, i, (bmp[i] & 0x2) != 0 ? pBlock->Color : 0, 4, 7, 4);
+            DrawPixel(3, i, (bmp[i] & 0x1) != 0 ? pBlock->Color : 0, 4, 7, 4);               
         }
-        DrawBlock(pBlock, 3, 2, 6);
     }
 
     void ClearBlock(const Nanochord::Block* pBlock) override
     {
-        DrawBlock(pBlock, 0, m_indend + 1, 3);
+        DrawBlock(pBlock, 0, m_indent + 1, 3, m_rows);
     }
 
     void PaintPlayground(const Nanochord::Playfield* pPlayfield) override
@@ -67,14 +70,14 @@ public:
         {
             for (byte x = 0; x < m_cols; x++)
             {
-                DrawPixel(x, y, pPlayfield->Map[y][x], m_indend + 1, 3);
+                DrawPixel(x, y, pPlayfield->Map[y][x], m_indent + 1, 3, m_rows);
             }
         }
     }
 
     void Print(const char* text) override
     {
-        cout << text;
+        cerr << text;
     }
 
     int Random(int max) override
@@ -82,14 +85,25 @@ public:
         return rand() % max;
     }
 
+    void TetrisEvent(Nanochord::TetrisEventKind kind) override
+    {
+        // Add custom event handling here...
+    }
+
     // Functions
+
+    static void SetColor(int textColor, int bgColor)
+    {
+        HANDLE hConsole = ::GetStdHandle(STD_OUTPUT_HANDLE);
+        ::SetConsoleTextAttribute(hConsole, (bgColor << 4) | textColor);
+    }
 
     static void SetCursorPosition(char x, char y)
     {
-        static const HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        HANDLE hOut = ::GetStdHandle(STD_OUTPUT_HANDLE);
         std::cout.flush();
         COORD coord = { (SHORT)x, (SHORT)y };
-        SetConsoleCursorPosition(hOut, coord);
+        ::SetConsoleCursorPosition(hOut, coord);
     }
 
     static int CalculateDelayInMs(int tetrisLevel)
@@ -100,17 +114,24 @@ public:
     static bool GetKeyEventRecord(KEY_EVENT_RECORD& krec)
     {
         DWORD cc;
-        INPUT_RECORD irec[128];
-        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        INPUT_RECORD irec;
+        HANDLE hIn = ::GetStdHandle(STD_INPUT_HANDLE);
 
-        if (hOut != NULL)
+        if (hIn != NULL)
         {
-            BOOL f = ReadConsoleInput(hOut, irec, 128, &cc);
+            // Unfortunately, I haven't found any solutions so far for how to detect in a console application whether a key press
+            // is available without blocking the application.
 
-            if (f) // TODO
-                //&& irec.EventType == KEY_EVENT && ((KEY_EVENT_RECORD&)irec.Event).bKeyDown)
+            //BOOL f = PeekConsoleInput(hIn, &irec, 1, &cc);
+            BOOL f = ::ReadConsoleInput(hIn, &irec, 1, &cc);
+
+            if (f && irec.EventType == KEY_EVENT && ((KEY_EVENT_RECORD&)irec.Event).bKeyDown)
             {
-                krec = (KEY_EVENT_RECORD&)irec[0].Event;
+                krec = (KEY_EVENT_RECORD&)irec.Event;
+
+                //ReadConsoleInput(hIn, &irec, 1, &cc);
+                //FlushConsoleInputBuffer(hIn);
+
                 return true;
             }
         }
@@ -120,35 +141,43 @@ public:
 
     void DrawPlayground() const
     {
-        cout << string(m_indend, ' ') << '+' << string(m_cols, '-') << '+' << endl;
+        SetColor(15, 0);
+
+        cout << string(m_indent, ' ') << '+' << string(m_cols, '-') << '+' << endl;
 
         for (int r = 0; r < m_rows; r++)
         {
-            cout << string(m_indend, ' ') << '|' << string(m_cols, ' ') << '|' << endl;
+            cout << string(m_indent, ' ') << '|' << string(m_cols, ' ') << '|' << endl;
         }
 
-        cout << string(m_indend, ' ') << '+' << string(m_cols, '-') << '+' << endl;
+        cout << string(m_indent, ' ') << '+' << string(m_cols, '-') << '+' << endl;
 
-        ConsoleHost::SetCursorPosition(2, 3);
-        cout << "Level:  " << (int)1;
+        SetCursorPosition(2, 3);
+        cout << "Level:";
 
-        ConsoleHost::SetCursorPosition(2, 4);
-        cout << "Points: " << 0;
+        SetCursorPosition(2, 4);
+        cout << "Points:";
 
-        SetCursorPosition(0, 7);
-        cout << "  +----+\n";
-        cout << "  |    |\n";
-        cout << "  |    |\n";
-        cout << "  +----+";
+        SetCursorPosition(2, 7);
+        cout << "Next block:";
+
+        DisplayValues(1, 0);
     }
 
-    static void SetColor(int textColor, int bgColor)
+    static void DisplayValues(int level, int points)
     {
-        HANDLE hConsole = ::GetStdHandle(STD_OUTPUT_HANDLE);
-        SetConsoleTextAttribute(hConsole, (bgColor << 4) | textColor);
+        SetColor(15, 0);
+
+        SetCursorPosition(10, 3);
+        cout << level;
+
+        SetCursorPosition(10, 4);
+        cout << points;
+
+        SetCursorPosition(80, 0);
     }
 
-    void DrawBlock(const Nanochord::Block* pBlock, byte color, int xorigin, int yorigin)
+    void DrawBlock(const Nanochord::Block* pBlock, byte color, int xorigin, int yorigin, int rows)
     {
         const byte* bmp = pBlock->GetCurrentBitmap();
 
@@ -157,25 +186,58 @@ public:
             byte yy = pBlock->Y + 1 - i;
 
             if ((bmp[i] & 0x8) != 0)
-                DrawPixel(pBlock->X - 2, yy, color, xorigin, yorigin);
+                DrawPixel(pBlock->X - 2, yy, color, xorigin, yorigin, rows);
             if ((bmp[i] & 0x4) != 0)
-                DrawPixel(pBlock->X - 1, yy, color, xorigin, yorigin);
+                DrawPixel(pBlock->X - 1, yy, color, xorigin, yorigin, rows);
             if ((bmp[i] & 0x2) != 0)
-                DrawPixel(pBlock->X, yy, color, xorigin, yorigin);
+                DrawPixel(pBlock->X, yy, color, xorigin, yorigin, rows);
             if ((bmp[i] & 0x1) != 0)
-                DrawPixel(pBlock->X + 1, yy, color, xorigin, yorigin);
+                DrawPixel(pBlock->X + 1, yy, color, xorigin, yorigin, rows);
         }
 
-        ConsoleHost::SetCursorPosition(80, 0);
+        SetCursorPosition(80, 0);
     }
 
-    void DrawPixel(byte x, byte y, byte color, int xorigin, int yorigin)
+    void DrawPixel(byte x, byte y, byte color, int xorigin, int yorigin, int rows) const
     {
         if (x >= 0 && y >= 0 && x < m_cols && y < m_rows)
         {
             SetColor(color, color);
-            ConsoleHost::SetCursorPosition(xorigin + x, yorigin + (m_rows - y));
+            SetCursorPosition(xorigin + x, yorigin + (rows - y));
             cout << ' ';
         }
+    }
+
+    void DisplayPaused(bool show)
+    {
+        SetColor(6, 0);
+        SetCursorPosition(2, 17);
+
+        if (show)
+        {
+            cout << "** GAME PAUSED **";
+        }
+        else
+        {
+            cout << "                 ";
+        }
+    }
+
+    void DisplayGameOver()
+    {
+        SetColor(0, 15);
+
+        int x = m_indent + (m_cols - 15) / 2 + 1;
+
+        SetCursorPosition(x, 3 + m_rows / 2 - 0);
+        cout << "***************";
+        SetCursorPosition(x, 3 + m_rows / 2 - 1);
+        cout << "*             *";
+        SetCursorPosition(x, 3 + m_rows / 2 - 2);
+        cout << "*  Game Over  *";
+        SetCursorPosition(x, 3 + m_rows / 2 - 3);
+        cout << "*             *";
+        SetCursorPosition(x, 3 + m_rows / 2 - 4);
+        cout << "***************";
     }
 };
