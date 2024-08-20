@@ -106,39 +106,6 @@ public:
         ::SetConsoleCursorPosition(hOut, coord);
     }
 
-    static int CalculateDelayInMs(int tetrisLevel)
-    {
-        return (11 - tetrisLevel) * 50;
-    }
-
-    static bool GetKeyEventRecord(KEY_EVENT_RECORD& krec)
-    {
-        DWORD cc;
-        INPUT_RECORD irec;
-        HANDLE hIn = ::GetStdHandle(STD_INPUT_HANDLE);
-
-        if (hIn != NULL)
-        {
-            // Unfortunately, I haven't found any solutions so far for how to detect in a console application whether a key press
-            // is available without blocking the application.
-
-            //BOOL f = PeekConsoleInput(hIn, &irec, 1, &cc);
-            BOOL f = ::ReadConsoleInput(hIn, &irec, 1, &cc);
-
-            if (f && irec.EventType == KEY_EVENT && ((KEY_EVENT_RECORD&)irec.Event).bKeyDown)
-            {
-                krec = (KEY_EVENT_RECORD&)irec.Event;
-
-                //ReadConsoleInput(hIn, &irec, 1, &cc);
-                //FlushConsoleInputBuffer(hIn);
-
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     void DrawPlayground() const
     {
         SetColor(15, 0);

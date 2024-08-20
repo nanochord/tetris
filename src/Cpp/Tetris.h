@@ -225,7 +225,8 @@ namespace Nanochord
     {
         GameOver,
         Touchdown,
-        RowCompleted
+        RowCompleted,
+        LevelChanged
     };
 
     /// <summary>
@@ -652,8 +653,8 @@ namespace Nanochord
             if (pBlock)
             {
                 pBlock->Y = m_Playfield.m_Rows - 1;
-                pBlock->X = m_Playfield.m_Columns / 2;
-                //pBlock->X = m_pHost->Random(m_Playfield.m_Columns - 4) + 2;
+                //pBlock->X = m_Playfield.m_Columns / 2;
+                pBlock->X = m_pHost->Random(m_Playfield.m_Columns - 4) + 2;
             }
 
             return pBlock;
@@ -722,6 +723,8 @@ namespace Nanochord
 
                     m_LinesCompleted++;
 
+                    m_pHost->TetrisEvent(TetrisEventKind::RowCompleted);
+
                     if (m_LinesCompleted <= 0)
                     {
                         m_ActualLevel = 1;
@@ -729,13 +732,14 @@ namespace Nanochord
                     else if ((m_LinesCompleted >= 1) && (m_LinesCompleted <= 90))
                     {
                         m_ActualLevel = 1 + ((m_LinesCompleted - 1) / 10);
+                        m_pHost->TetrisEvent(TetrisEventKind::LevelChanged);
                     }
                     else if (m_LinesCompleted >= 91)
                     {
                         m_ActualLevel = 10;
+                        m_pHost->TetrisEvent(TetrisEventKind::LevelChanged);
                     }
 
-                    m_pHost->TetrisEvent(TetrisEventKind::RowCompleted);
                     m_pHost->PaintPlayground(&m_Playfield);
                     m_pHost->DrawBlock(m_pCurrentBlock);
                 }

@@ -1,4 +1,8 @@
+
+#pragma warning(disable: 28159)
+
 #include <iostream>
+#include <conio.h>
 #include "ConsoleHost.h"
 
 const int ROWS = 20;
@@ -15,7 +19,6 @@ int main()
     Host.DrawPlayground();
 
     int tetrisLevel = tetris.Start();
-    KEY_EVENT_RECORD key;
 
     DWORD lastTickCount = ::GetTickCount();
 
@@ -28,32 +31,40 @@ int main()
             cin.get();
             tetris.Start();
         }
-        else
+        else if (_kbhit())
         {
-            // TODO: Unfortunately, this solution blocks the console application until the user presses a key.
-            //       I haven't found so far a better solution...
-
-            if (ConsoleHost::GetKeyEventRecord(key))
+            char fkey  = _getch();
+            
+            if (fkey == -32) // arrow key was pressed
             {
-                switch (key.wVirtualScanCode)
+                char skey = _getch();
+                switch (skey)
                 {
-                case 80: // Down
+                case 80: // Down arrow
                     tetris.Drop();
                     break;
-                case 72: // Up
+                case 72: // Up arrow
                     tetris.Rotate();
                     break;
-                case 75: // Left
+                case 75: // Left arrow
                     tetris.MoveLeft();
                     break;
-                case 77: // Right
+                case 77: // Right arrow
                     tetris.MoveRight();
                     break;
-                case 25:
+                }
+            }
+            else
+            {
+                switch (fkey)
+                {
+                case 'p':
+                case 'P':
                     tetris.Pause();
                     Host.DisplayPaused(tetris.GetIsPaused());
                     break;
-                case 16: // Q
+                case 'q':
+                case 'Q':
                     ConsoleHost::SetColor(15, 0);
                     ConsoleHost::SetCursorPosition(0, ROWS + 4);
                     return 0;
@@ -62,7 +73,7 @@ int main()
         }
 
         DWORD m = ::GetTickCount();
-        DWORD delay = ConsoleHost::CalculateDelayInMs(tetrisLevel);
+        DWORD delay = (11 - tetrisLevel) * 50;
         if ((m - lastTickCount) > delay)
         {
             tetrisLevel = tetris.Run();
