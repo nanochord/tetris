@@ -42,8 +42,22 @@ while (!tetris.GetGameOver())
 
 ## Demos
 
+**Console application**
+
+This console application demonstrates how can a Console application based game be made with the library using Visual Studio. This demo application can only be run on Windows.
+
 ![image](./images/consoledemo.png "Console demo")
 
+**Arduino**
+
+This demo sketch would like to demonstrate how can a simple game be developed with an Arduino Uno and an RGB TFT display shield. The game can be controlled through the Serial Monitor embedded in the Arduino IDE.
+
+This demo application is based on the following 3rd party libraries:
+- Arduino GFX Library
+- MCUFRIEND_bkv
+- UTFTGLUE
+
+![image](./images/arduinodemo.png "Arduino demo")
+
 Coming soon:
-* Arduino demo
 * C# version with WPF demo
