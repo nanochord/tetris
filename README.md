@@ -7,7 +7,7 @@ There can be found demo applications in the repository so as to show how can it 
 
 ## How to use?
 
-In C++ simple include the Tetris.h header file. The tetris enums and classes are within the **Nanochord** namespace. The **Nanochord:Host** abastract class must be implemented by the host code.
+In C++ simply include the Tetris.h header file. The tetris enums and classes are within the **Nanochord** namespace. The **Nanochord:Host** abastract class must be implemented by the host code.
 
 ```cpp
 #include "Tetris.h"
