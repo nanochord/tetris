@@ -2,12 +2,14 @@
 
 Simple Tetris game library.
 
-This library was originally made for an Arduino based GameBox hardware. However, the solution was platform independent, therefore, it can be applied in other solutions, as well.
+This library was originally made for an Arduino based GameBox hardware. However, the solution had been platform independent, therefore, it can be applied in other solutions, as well.
 There can be found demo applications in the repository so as to show how can it be used in different environments.
 
 ## How to use?
 
 In C++ simple include the Tetris.h header file. The tetris enums and classes are within the **Nanochord** namespace. The **Nanochord:Host** abastract class must be implemented by the host code.
+
+In C# use the Tetris.cs in your project similar to the C++ version.
 
 ```cpp
 #include "Tetris.h"
@@ -40,6 +42,7 @@ while (!tetris.GetGameOver())
 }
 ```
 
+
 ## Demos
 
 **Console application**
@@ -59,5 +62,8 @@ This demo application is based on the following 3rd party libraries:
 
 ![image](./images/arduinodemo.png "Arduino demo")
 
-Coming soon:
-* C# version with WPF demo
+** C# WPF Application **
+
+The WpfTetrisDemo project demonstrates the C# version of the library through a WPF application.
+
+![image](./images/wpfdemo.png "Arduino demo")

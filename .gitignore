@@ -35,3 +35,7 @@
 /src/Demos/VisualStudio/Demos/ConsoleCpp/x64/Debug
 /src/Demos/VisualStudio/Demos/x64/Debug
 /src/Demos/Arduino/TetrisApp/.theia
+/src/Demos/VisualStudio/Demos/WpfTetrisDemo/bin/Debug/net8.0-windows
+/src/Demos/VisualStudio/Demos/WpfTetrisDemo/obj/Debug/net8.0-windows
+/src/Demos/VisualStudio/Demos/WpfTetrisDemo/obj
+/src/Demos/VisualStudio/Demos/.vs/ProjectEvaluation
