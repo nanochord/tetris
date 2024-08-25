@@ -7,7 +7,7 @@ There can be found demo applications in the repository so as to show how can it 
 
 ## How to use?
 
-In C++ simple include the Tetris.h header file. The tetris enums and classes are within the **Nanochord** namespace. The **Nanochord:Host** abastract class must be implemented by the host code.
+In C++ simply include the Tetris.h header file. The tetris enums and classes are within the **Nanochord** namespace. The **Nanochord:Host** abastract class must be implemented by the host code.
 
 In C# use the Tetris.cs in your project similar to the C++ version.
 
@@ -56,7 +56,7 @@ This console application demonstrates how can a Console application based game b
 This demo sketch would like to demonstrate how can a simple game be developed with an Arduino Uno and an RGB TFT display shield. The game can be controlled through the Serial Monitor embedded in the Arduino IDE.
 
 This demo application is based on the following 3rd party libraries:
-- Arduino GFX Library
+- Adafruit GFX Library
 - MCUFRIEND_bkv
 - UTFTGLUE
 
