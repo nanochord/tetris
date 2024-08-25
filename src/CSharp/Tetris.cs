@@ -167,7 +167,7 @@ namespace Nanochord
         int Random(int max);
 
         // Called when a Tetris game event occurs.
-        void TetrisEvent(TetrisEventKind kind);
+        void TetrisEvent(TetrisEventKind kind, int parameter);
     }
 
 
@@ -592,7 +592,7 @@ namespace Nanochord
                 if (ptr2 != PlacementTestResult.Succeeded)
                 {
                     GameOver = true;
-                    mHost.TetrisEvent(TetrisEventKind.GameOver);
+                    mHost.TetrisEvent(TetrisEventKind.GameOver, 0);
                 }
             }
             else
@@ -624,7 +624,7 @@ namespace Nanochord
                 if (pres != PlacementTestResult.Succeeded)
                 {
                     ActualPoints++; // TODO: It simply increases the number of points.
-                    mHost.TetrisEvent(TetrisEventKind.Touchdown);
+                    mHost.TetrisEvent(TetrisEventKind.Touchdown, 0);
                 }
 
                 // completed rows test
@@ -634,12 +634,12 @@ namespace Nanochord
                 {
                     for (byte i = 0; i < cnt; i++)
                     {
-                        mPlayfield.ClearRow((byte)mPlayfield.CompletedLines[i]);
+                        int line = mPlayfield.CompletedLines[i];
+                        mHost.TetrisEvent(TetrisEventKind.RowCompleted, line);
+                        mPlayfield.ClearRow((byte)line);
                     }
 
-                    LinesCompleted++;
-
-                    mHost.TetrisEvent(TetrisEventKind.RowCompleted);
+                    LinesCompleted += cnt;
 
                     if (LinesCompleted <= 0)
                     {
@@ -648,12 +648,12 @@ namespace Nanochord
                     else if ((LinesCompleted >= 1) && (LinesCompleted <= 90))
                     {
                         ActualLevel = (byte)(1 + ((LinesCompleted - 1) / 10));
-                        mHost.TetrisEvent(TetrisEventKind.LevelChanged);
+                        mHost.TetrisEvent(TetrisEventKind.LevelChanged, 0);
                     }
                     else if (LinesCompleted >= 91)
                     {
                         ActualLevel = 10;
-                        mHost.TetrisEvent(TetrisEventKind.LevelChanged);
+                        mHost.TetrisEvent(TetrisEventKind.LevelChanged, 0);
                     }
 
                     mHost.PaintPlayground(mPlayfield);

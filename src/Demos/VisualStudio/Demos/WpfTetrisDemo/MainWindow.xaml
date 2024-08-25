@@ -54,6 +54,9 @@
             <TextBlock Margin="90 30 0 0" Text="{Binding ActualLevel}" Foreground="White" />
             <TextBlock Margin="30 60 0 0" Text="Lines:" />
             <TextBlock Margin="90 60 0 0" Text="{Binding CompletedRows}" Foreground="White" />
+
+            <TextBlock Margin="30 300 0 0" Text="High score:" />
+            <TextBlock Margin="95 300 0 0" Text="{Binding HighScore}" Foreground="White" />
         </Grid>
 
         <!--Playfield-->

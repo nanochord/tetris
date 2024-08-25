@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using WpfTetrisDemo.Models;
 
 namespace WpfTetrisDemo.ViewModels;
 
@@ -27,6 +28,12 @@ public class MainWindowViewModel : BaseViewModel, IHost
 
         if (!DesignerProperties.GetIsInDesignMode(new DependencyObject()))
         {
+            try
+            {
+                data = TetrisDataModel.Load(dataFileName);
+            }
+            catch { }
+
             tetrisLevel = tetris.Start();
             lastTickCount = Environment.TickCount;
 
@@ -34,9 +41,20 @@ public class MainWindowViewModel : BaseViewModel, IHost
             timer.Start();
             DisplayValues();
 
+            // Play background music...
             bgMusicPlayer.Open(new Uri(Path.Combine(appPath, "Resources", "stellar-echoes-202315.mp3")));
             bgMusicPlayer.Play();
-            bgMusicPlayer.MediaEnded += (o, args) => { bgMusicPlayer.Play(); };
+            bgMusicPlayer.MediaEnded += (o, args) =>
+            {
+                Task.Delay(5000).ContinueWith(t =>
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        bgMusicPlayer.Stop();
+                        bgMusicPlayer.Play();
+                    });
+                });
+            };
         }
     }
 
@@ -45,9 +63,11 @@ public class MainWindowViewModel : BaseViewModel, IHost
     #region Fields
 
     readonly string appPath = Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
+    readonly string dataFileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "nanochord", "tetris.dat");
     readonly MediaPlayer player = new() { Volume = 0.8 };
     readonly MediaPlayer bgMusicPlayer = new() { Volume = 0.8 };
     readonly Tetris tetris;
+    readonly TetrisDataModel data;
     readonly Random rand = new(Environment.TickCount);
     readonly DispatcherTimer timer = new()
     {
@@ -102,7 +122,7 @@ public class MainWindowViewModel : BaseViewModel, IHost
 
     public int Random(int max) => rand.Next(0, max);
 
-    public void TetrisEvent(TetrisEventKind kind)
+    public void TetrisEvent(TetrisEventKind kind, int parameter)
     {
         DisplayValues();
 
@@ -112,12 +132,18 @@ public class MainWindowViewModel : BaseViewModel, IHost
             timer.Stop();
 
             PlaySoundEffect("002.mp3");
+
+            UpdateHighScoreIfHit();
         }
         else if (kind == TetrisEventKind.Touchdown)
         {
             if (!tetris.GameOver)
             {
                 PlaySoundEffect("003.mp3");
+            }
+            else
+            {
+                UpdateHighScoreIfHit();
             }
         }
         else if (kind == TetrisEventKind.RowCompleted)
@@ -297,19 +323,48 @@ public class MainWindowViewModel : BaseViewModel, IHost
         player.Play();
     }
 
+    void UpdateHighScoreIfHit()
+    {
+        if (ActualPoints > HighScore)
+        {
+            HighScore = ActualPoints;
+
+            try
+            {
+                data.Save(dataFileName);
+            }
+            catch
+            {
+            }
+        }
+    }
+
     #endregion
 
     #region Mvvm
 
     private readonly ObservableCollection<BlockViewModel> _Map;
-    public ObservableCollection<BlockViewModel> Map { get { return _Map; } }
+    public ObservableCollection<BlockViewModel> Map { get => _Map; }
 
     private readonly ObservableCollection<BlockViewModel> _NextBlock;
-    public ObservableCollection<BlockViewModel> NextBlock { get { return _NextBlock; } }
+    public ObservableCollection<BlockViewModel> NextBlock { get => _NextBlock; }
 
     public int ActualPoints { get => tetris.ActualPoints; }
     public int ActualLevel { get => tetris.ActualLevel; }
     public int CompletedRows { get => tetris.LinesCompleted; }
+
+    public int HighScore
+    {
+        get => data.HighScore;
+        set
+        {
+            if (data.HighScore != value)
+            {
+                data.HighScore = value;
+                RaisePropertyChanged();
+            }
+        }
+    }
 
     private string _message = string.Empty;
     public string Message
