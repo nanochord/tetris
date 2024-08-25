@@ -1,8 +1,10 @@
 ﻿using Nanochord;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace WpfTetrisDemo.ViewModels;
@@ -31,6 +33,10 @@ public class MainWindowViewModel : BaseViewModel, IHost
             timer.Tick += Timer_Tick;
             timer.Start();
             DisplayValues();
+
+            bgMusicPlayer.Open(new Uri(Path.Combine(appPath, "Resources", "stellar-echoes-202315.mp3")));
+            bgMusicPlayer.Play();
+            bgMusicPlayer.MediaEnded += (o, args) => { bgMusicPlayer.Play(); };
         }
     }
 
@@ -38,6 +44,9 @@ public class MainWindowViewModel : BaseViewModel, IHost
 
     #region Fields
 
+    readonly string appPath = Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
+    readonly MediaPlayer player = new() { Volume = 0.8 };
+    readonly MediaPlayer bgMusicPlayer = new() { Volume = 0.8 };
     readonly Tetris tetris;
     readonly Random rand = new(Environment.TickCount);
     readonly DispatcherTimer timer = new()
@@ -101,6 +110,19 @@ public class MainWindowViewModel : BaseViewModel, IHost
         {
             Message = "Game over";
             timer.Stop();
+
+            PlaySoundEffect("002.mp3");
+        }
+        else if (kind == TetrisEventKind.Touchdown)
+        {
+            if (!tetris.GameOver)
+            {
+                PlaySoundEffect("003.mp3");
+            }
+        }
+        else if (kind == TetrisEventKind.RowCompleted)
+        {
+            PlaySoundEffect("004.mp3");
         }
     }
 
@@ -266,6 +288,13 @@ public class MainWindowViewModel : BaseViewModel, IHost
         RaisePropertyChanged(nameof(ActualPoints));
         RaisePropertyChanged(nameof(ActualLevel));
         RaisePropertyChanged(nameof(CompletedRows));
+    }
+
+    void PlaySoundEffect(string name)
+    {
+        player.Stop();
+        player.Open(new Uri(Path.Combine(appPath, "Resources", name)));
+        player.Play();
     }
 
     #endregion

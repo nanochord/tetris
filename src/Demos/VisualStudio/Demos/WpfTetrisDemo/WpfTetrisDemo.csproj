@@ -9,7 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\001.mp3" />
+    <None Remove="Resources\002.mp3" />
+    <None Remove="Resources\003.mp3" />
+    <None Remove="Resources\004.mp3" />
     <None Remove="Resources\bg.jpg" />
+    <None Remove="Resources\stellar-echoes-202315.mp3" />
   </ItemGroup>
 
 	<ItemGroup>
@@ -17,6 +22,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Include="Resources\002.mp3">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Resources\003.mp3">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Resources\004.mp3">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Resources\stellar-echoes-202315.mp3">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
 	  <Resource Include="Resources\bg.jpg" />
 	</ItemGroup>
 
