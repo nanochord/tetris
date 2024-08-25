@@ -8,8 +8,16 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Resources\bg.jpg" />
+  </ItemGroup>
+
 	<ItemGroup>
 		<Compile Include="..\..\..\..\CSharp\Tetris.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="Resources\bg.jpg" />
 	</ItemGroup>
 
 </Project>

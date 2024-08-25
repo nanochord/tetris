@@ -4,14 +4,19 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:WpfTetrisDemo.ViewModels"
-        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
+        ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
         Background="#101010" Foreground="White"
         Title="Nanochord Tetris demo" Height="500" Width="600">
     <Window.Resources>
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="Gray" />
         </Style>
+        <DataTemplate x:Key="pixel" DataType="{x:Type viewmodels:BlockViewModel}">
+            <Border BorderThickness="2 2 0 0" BorderBrush="{Binding TopLeftColor}">
+                <Border BorderThickness="0 0 2 2" BorderBrush="{Binding BottomRightColor}" Background="{Binding MainColor}" />
+            </Border>
+        </DataTemplate>
     </Window.Resources>
     <Window.DataContext>
         <viewmodels:MainWindowViewModel />
@@ -24,6 +29,7 @@
         <KeyBinding Key="Space" Command="{Binding PauseCommand}"/>
         <KeyBinding Key="Enter" Command="{Binding EnterCommand}"/>
     </Window.InputBindings>
+  
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
@@ -34,6 +40,8 @@
             <ColumnDefinition Width="220" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
+
+        <Image Grid.ColumnSpan="3" Grid.RowSpan="2" Source="pack://application:,,,/Resources/bg.jpg" Stretch="UniformToFill" />
 
         <!--Title-->
         <TextBlock Grid.ColumnSpan="3" Foreground="Cyan" Padding="10" HorizontalAlignment="Center" Text="Copyright © 2024 Nanochord Tetris library demo" />
@@ -50,7 +58,7 @@
 
         <!--Playfield-->
         <Grid Grid.Column="1" Grid.Row="1">
-            <ItemsControl ItemsSource="{Binding Map}">
+            <ItemsControl ItemsSource="{Binding Map}" ItemTemplate="{StaticResource pixel}">
                 <ItemsControl.Template>
                     <ControlTemplate TargetType="ItemsControl">
                         <Border BorderBrush="Green" BorderThickness="2" Height="404" Width="204">
@@ -69,40 +77,18 @@
                         <UniformGrid Rows="20" Columns="10" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border BorderThickness="2 2 0 0"
-                                BorderBrush="{Binding TopLeftColor}">
-                            <Border BorderThickness="0 0 2 2"
-                                    BorderBrush="{Binding BottomRightColor}">
-                                <Grid Background="{Binding MainColor}" />
-                            </Border>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
             </ItemsControl>
         </Grid>
 
         <!--Next block-->
         <Grid Grid.Column="2" Grid.Row="1" >
             <TextBlock HorizontalAlignment="Center" Margin="0 30 0 0" Foreground="Gray" Text="Next block" />
-            <ItemsControl ItemsSource="{Binding NextBlock}" Margin="0 50 0 0" VerticalAlignment="Top">
+            <ItemsControl ItemsSource="{Binding NextBlock}" Margin="0 50 0 0" VerticalAlignment="Top" ItemTemplate="{StaticResource pixel}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <UniformGrid Rows="4" Columns="4" Height="80" Width="80" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border BorderThickness="2 2 0 0"
-                                BorderBrush="{Binding TopLeftColor}">
-                            <Border BorderThickness="0 0 2 2"
-                                    BorderBrush="{Binding BottomRightColor}">
-                                <Grid Background="{Binding MainColor}" />
-                            </Border>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
             </ItemsControl>
         </Grid>
 

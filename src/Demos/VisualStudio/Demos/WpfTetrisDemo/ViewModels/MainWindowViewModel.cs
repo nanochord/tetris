@@ -1,5 +1,6 @@
 ﻿using Nanochord;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -22,12 +23,15 @@ public class MainWindowViewModel : BaseViewModel, IHost
             Enumerable.Range(0, 16).Select(i => new BlockViewModel())
         );
 
-        tetrisLevel = tetris.Start();
-        lastTickCount = Environment.TickCount;
+        if (!DesignerProperties.GetIsInDesignMode(new DependencyObject()))
+        {
+            tetrisLevel = tetris.Start();
+            lastTickCount = Environment.TickCount;
 
-        timer.Tick += Timer_Tick;
-        timer.Start();
-        DisplayValues();
+            timer.Tick += Timer_Tick;
+            timer.Start();
+            DisplayValues();
+        }
     }
 
     #endregion
