@@ -62,7 +62,7 @@ This demo application is based on the following 3rd party libraries:
 
 ![image](./images/arduinodemo.png "Arduino demo")
 
-** C# WPF Application **
+**C# WPF Application**
 
 The WpfTetrisDemo project demonstrates the C# version of the library through a WPF application.
 
