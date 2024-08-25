@@ -8,4 +8,8 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+	<ItemGroup>
+		<Compile Include="..\..\..\..\CSharp\Tetris.cs" />
+	</ItemGroup>
+
 </Project>
